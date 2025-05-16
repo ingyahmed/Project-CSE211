@@ -1,64 +1,86 @@
-![](./resources/official_armmbed_example_badge.png)
-# Blinky Mbed OS example
+# NUCLEO-F401RE Digital Clock & Analog Voltage Display
 
-The example project is part of the [Arm Mbed OS Official Examples](https://os.mbed.com/code/) and is the [getting started example for Mbed OS](https://os.mbed.com/docs/mbed-os/v5.14/quick-start/index.html). It contains an application that repeatedly blinks an LED on supported [Mbed boards](https://os.mbed.com/platforms/).
+## Project Overview
 
-You can build the project with all supported [Mbed OS build tools](https://os.mbed.com/docs/mbed-os/latest/tools/index.html). However, this example project specifically refers to the command-line interface tool [Arm Mbed CLI](https://github.com/ARMmbed/mbed-cli#installing-mbed-cli).
-(Note: To see a rendered example you can import into the Arm Online Compiler, please see our [import quick start](https://os.mbed.com/docs/mbed-os/latest/quick-start/online-with-the-online-compiler.html#importing-the-code).)
+This project implements a digital clock combined with an analog voltage display on a 4-digit 7-segment display using the NUCLEO-F401RE development board paired with an Arduino Multifunction Shield. It showcases real-time data monitoring by displaying either the elapsed time since reset or the current analog voltage read from a potentiometer.
 
-1. [Install Mbed CLI](https://os.mbed.com/docs/mbed-os/latest/quick-start/offline-with-mbed-cli.html).
+The 7-segment display is driven via a shift register controlled through digital pins on the NUCLEO board. Users can toggle between the time and voltage display modes using onboard buttons, making this project a practical example of embedded real-time data handling with MBED OS.
 
-1. Clone this repository on your system, and change the current directory to where the project was cloned:
+---
 
-    ```bash
-    $ git clone git@github.com:armmbed/mbed-os-example-blinky && cd mbed-os-example-blinky
-    ```
+## Features
 
-    Alternatively, you can download the example project with Arm Mbed CLI using the `import` subcommand:
+- **Time Display:** Shows elapsed time in MM:SS format, counting minutes and seconds since reset.
+- **Voltage Display:** Reads and displays the analog voltage from a potentiometer with 2 decimal places.
+- **User Input:**
+  - Button S1 resets the clock to 00:00.
+  - Button S3 toggles the display to show voltage readings.
+- **Hardware Control:** Utilizes a shift register to drive a multiplexed 4-digit 7-segment display.
+- **Real-time Updates:** Uses MBED OS timers and interrupt service routines for precise timekeeping.
 
-    ```bash
-    $ mbed import mbed-os-example-blinky && cd mbed-os-example-blinky
-    ```
+---
 
+## Hardware Requirements
 
-## Application functionality
+- **NUCLEO-F401RE Development Board**
+- **Arduino Multifunction Shield** (includes 4-digit 7-segment display, potentiometer, and switches)
 
-The `main()` function is the single thread in the application. It toggles the state of a digital output connected to an LED on the board.
+### Pin Connections
 
-## Building and running
+| Signal     | NUCLEO Pin |
+|------------|------------|
+| Latch (ST_CP) | D4       |
+| Clock (SH_CP) | D7       |
+| Data (DS)     | D8       |
+| Potentiometer (Analog Input) | A0 |
+| Button S1 (Reset) | A1    |
+| Button S3 (Display Voltage) | A3 |
 
-1. Connect a USB cable between the USB port on the board and the host computer.
-2. <a name="build_cmd"></a> Run the following command to build the example project and program the microcontroller flash memory:
-    ```bash
-    $ mbed compile -m <TARGET> -t <TOOLCHAIN> --flash
-    ```
-The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-blinky.bin`.
+---
 
-Alternatively, you can manually copy the binary to the board, which you mount on the host computer over USB.
+## Software Requirements
 
-Depending on the target, you can build the example project with the `GCC_ARM`, `ARM` or `IAR` toolchain. After installing Arm Mbed CLI, run the command below to determine which toolchain supports your target:
+- MBED Studio IDE
 
-```bash
-$ mbed compile -S
-```
+---
 
-## Expected output
-The LED on your target turns on and off every 500 milliseconds.
+## System Design
 
+### Startup and Initialization
 
-## Troubleshooting
-If you have problems, you can review the [documentation](https://os.mbed.com/docs/latest/tutorials/debugging.html) for suggestions on what could be wrong and how to fix it.
+- **Vector Table:** Located at address 0x0, sets up initial stack pointer and reset handler.
+- **Reset Handler:** Calls `SystemInit` for clock setup, then jumps to `main()`.
+- **Default Exception Handlers:** Loop infinitely if unexpected interrupts occur.
 
-## Related Links
+### Code Structure
 
-* [Mbed OS Stats API](https://os.mbed.com/docs/latest/apis/mbed-statistics.html).
-* [Mbed OS Configuration](https://os.mbed.com/docs/latest/reference/configuration.html).
-* [Mbed OS Serial Communication](https://os.mbed.com/docs/latest/tutorials/serial-communication.html).
-* [Mbed OS bare metal](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html).
-* [Mbed boards](https://os.mbed.com/platforms/).
+- **Pin Configuration:** DigitalOut for shift register pins and DigitalIn for buttons.
+- **Analog Input:** Reads potentiometer voltage via on-chip ADC.
+- **Timekeeping:** Uses a `Ticker` to increment seconds and minutes every 1 second via ISR.
+- **Shift Register Functions:**
+  - `shiftOutMSBFirst()` sends bits MSB first to the shift register.
+  - `writeToShiftRegister()` sends segment and digit data.
+- **Display Logic:** Multiplexes 4 digits to show time or voltage with optional decimal points.
 
-### License and contributions
+---
 
-The software is provided under Apache-2.0 license. Contributions to this project are accepted under the same license. Please see contributing.md for more info.
+## Usage
 
-This project contains code from other projects. The original license text is included in those source files. They must comply with our license guide.
+1. **Reset Clock:** Press **Button S1** to reset timer to 00:00.
+2. **Display Voltage:** Hold **Button S3** to display the current potentiometer voltage.
+3. **Display Time:** When Button S3 is not pressed, the display shows elapsed time in MMSS format.
+4. The display refreshes continuously to maintain stable output.
+
+---
+
+## Results
+
+- Real-time voltage changes are shown instantly when **Button S3** is pressed.
+- Timer increments every second and resets correctly when **Button S1** is pressed.
+- Seamless switching between time and voltage display modes.
+
+---
+
+## Conclusion
+
+This project successfully demonstrates integration of the NUCLEO-F401RE with an Arduino multifunction shield to display real-time clock and analog voltage measurements on a 4-digit 7-segment display. By leveraging MBED OS features such as timers and interrupts, it provides an accurate, user-friendly embedded system application.
