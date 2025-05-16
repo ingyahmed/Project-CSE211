@@ -6,7 +6,7 @@ This project implements a digital clock combined with an analog voltage display 
 
 The 7-segment display is driven via a shift register controlled through digital pins on the NUCLEO board. Users can toggle between the time and voltage display modes using onboard buttons, making this project a practical example of embedded real-time data handling with MBED OS.
 
-![Demo GIF]([https://yourdomain.com/demo.gif](https://drive.google.com/file/d/1RNnkTcYq1mZ82r0oqu9ahg3_Hxd8QIyC/view?usp=sharing))
+https://github.com/user-attachments/assets/9e0e4534-b90c-4504-8ee2-65e7095bd422
 
 ---
 
